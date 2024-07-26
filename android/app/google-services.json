@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "2405654849",
+    "project_id": "vi-deo-call",
+    "storage_bucket": "vi-deo-call.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:2405654849:android:7c3276f8fa9b5319ec01c0",
+        "android_client_info": {
+          "package_name": "com.example.webrtcvideocall"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-3OEyjU8RUKbNCwFYQmeYCNUNpRHUvCU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
