@@ -24,7 +24,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-   
     signaling.openUserMedia(_localRenderer, _remoteRenderer);
 
     _localRenderer.initialize();
@@ -85,7 +84,6 @@ class _MyHomePageState extends State<MyHomePage> {
               // Add roomId
               signaling.joinRoom(
                 textEditingController.text.trim(),
-                _remoteRenderer,
               );
             },
             child: Text("Join room"),

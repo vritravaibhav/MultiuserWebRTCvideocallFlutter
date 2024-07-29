@@ -6,6 +6,8 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 import 'package:webrtcvideocall/utils/uuid.dart';
 
+typedef void StreamStateCallback(MediaStream stream);
+
 class PeerConnection {
   RTCPeerConnection? peerConnection;
   MediaStream? localStream;
@@ -13,6 +15,7 @@ class PeerConnection {
   // String? roomId;
   RTCVideoRenderer _localRenderer = RTCVideoRenderer();
   RTCVideoRenderer _remoteRenderer = RTCVideoRenderer();
+  StreamStateCallback? onAddRemoteStream;
 
   Map<String, dynamic> configuration = {
     'iceServers': [
@@ -142,16 +145,22 @@ class PeerConnection {
   //   return data;
   // }
 
-  Future<VideoUserCall> joinRoom(
+  Future<void> joinRoom(
       {required String docId, required String collectionName}) async {
     try {
       peerConnection = await createPeerConnection(configuration);
+      registerPeerConnectionListeners();
+
       print("Step 5: PeerConnection created");
     } catch (e) {
       print("Error creating PeerConnection: $e");
       throw e;
     }
+    localStream = stream;
+    print("bta local stream sendingjoin1 ${localStream?.getTracks()}");
     localStream?.getTracks().forEach((track) {
+      print("bta local stream sendingjoin");
+
       peerConnection?.addTrack(track, localStream!);
     });
     String uid = await loadUserId();
@@ -184,7 +193,7 @@ class PeerConnection {
       throw e;
     }
     peerConnection!.onTrack = (RTCTrackEvent event) {
-      print('Got remote track: ${event.streams[0]}');
+      print('btaGot remote track: ${event.streams[0]}');
 
       event.streams[0].getTracks().forEach((track) {
         print('Add a track to the remoteStream $track');
@@ -202,7 +211,7 @@ class PeerConnection {
         Map<String, dynamic>? answerData = event.data();
         print("bta answers ${answerData!['answer']['type']}");
         var answer = RTCSessionDescription(
-          answerData!['answer']['sdp'],
+          answerData['answer']['sdp'],
           answerData['answer']['type'],
         );
         await peerConnection?.setRemoteDescription(answer);
@@ -220,6 +229,7 @@ class PeerConnection {
         Map<String, dynamic>? answerData = event.data();
 
         for (var element in answerData!["remoteIceCandidate"]) {
+          print("${element['candidate']} bta remote candidate");
           peerConnection!.addCandidate(
             RTCIceCandidate(
               element['candidate'],
@@ -231,17 +241,19 @@ class PeerConnection {
       },
       onError: (error) => print("Listen failed: $error"),
     );
-    return VideoUserCall(localVideo: localStream!, remoteVideo: remoteStream!);
   }
 
-  Future<VideoUserCall> addinRoom(
+  Future<void> addinRoom(
       {required String collectionName,
       required String docId,
       required String refuid,
       required Map<String, dynamic> uidData}) async {
     print("bta mapdata uid data ${uidData["localIceCandidates"]}");
     peerConnection = await createPeerConnection(configuration);
+    registerPeerConnectionListeners();
+
     localStream?.getTracks().forEach((track) {
+      print("bta local stream sending");
       peerConnection?.addTrack(track, localStream!);
     });
     peerConnection?.onIceCandidate = (RTCIceCandidate candidate) {
@@ -263,6 +275,8 @@ class PeerConnection {
         remoteStream?.addTrack(track);
       });
     };
+    print("${uidData['offer']['type']} bta type");
+
     await peerConnection?.setRemoteDescription(
       RTCSessionDescription(uidData['offer']['sdp'], uidData['offer']['type']),
     );
@@ -276,6 +290,8 @@ class PeerConnection {
         .set({"answer": answer.toMap()}, SetOptions(merge: true));
 
     for (var element in uidData["localIceCandidates"]) {
+      print("${element['candidate']} bta localcandidate");
+
       peerConnection!.addCandidate(
         RTCIceCandidate(
           element['candidate'],
@@ -284,24 +300,22 @@ class PeerConnection {
         ),
       );
     }
-    if (localStream != null && remoteStream != null) {
-      return VideoUserCall(
-          localVideo: localStream!, remoteVideo: remoteStream!);
-    } else {
-      throw 0;
-    }
   }
 
+  var stream;
   Future<void> openUserMedia(
     RTCVideoRenderer localVideo,
     RTCVideoRenderer remoteVideo,
   ) async {
-    var stream = await navigator.mediaDevices
+    stream = await navigator.mediaDevices
         .getUserMedia({'video': true, 'audio': true});
 
     localVideo.srcObject = stream;
     localStream = stream;
-
+    print(" ${localStream!.getTracks().length} bta length of local stream");
+    localStream!.getTracks().forEach((track) {
+      print("Track: ${track.kind}");
+    });
     remoteVideo.srcObject = await createLocalMediaStream('key');
   }
 
@@ -323,18 +337,9 @@ class PeerConnection {
     };
 
     peerConnection?.onAddStream = (MediaStream stream) {
-      print("Add remote stream");
-      // onAddRemoteStream?.call(stream);
+      print("Add remote streambta");
+      onAddRemoteStream?.call(stream);
       remoteStream = stream;
     };
   }
-}
-
-class VideoUserCall {
-  MediaStream localVideo;
-  MediaStream remoteVideo;
-  VideoUserCall({
-    required this.localVideo,
-    required this.remoteVideo,
-  });
 }

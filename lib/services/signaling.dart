@@ -108,7 +108,9 @@ class Signaling {
     return roomId;
   }
 
-  Future<void> joinRoom(String roomId, RTCVideoRenderer remoteVideo) async {
+  Future<void> joinRoom(
+    String roomId,
+  ) async {
     FirebaseFirestore db = FirebaseFirestore.instance;
     print(roomId);
     DocumentReference roomRef = db.collection('rooms').doc('$roomId');
@@ -191,6 +193,7 @@ class Signaling {
 
     localVideo.srcObject = stream;
     localStream = stream;
+    print("bta length of local stream ${localStream!.getTracks().length}");
 
     remoteVideo.srcObject = await createLocalMediaStream('key');
   }
