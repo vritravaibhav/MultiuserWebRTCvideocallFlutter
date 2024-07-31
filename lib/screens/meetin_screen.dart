@@ -1,10 +1,14 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:webrtcvideocall/services/peer_connection.dart';
 
@@ -36,9 +40,16 @@ class _MeetingScreenState extends State<MeetingScreen> {
     // listenNew();
   }
 
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _localRenderer.dispose();
+    super.dispose();
+  }
+
   RTCVideoRenderer _localRenderer = RTCVideoRenderer();
 
-  List<PeerConnection> list = [];
+  List<List<dynamic>> list = [];
   List<String> docId = [];
   listenNew() async {
     await FirebaseFirestore.instance
@@ -56,33 +67,18 @@ class _MeetingScreenState extends State<MeetingScreen> {
           continue;
         }
         docId.add(doc.id);
-        PeerConnection temp = PeerConnection();
-        // temp.openUserMedia(_localRenderer, tempRemoteRenderer);
 
-        // tempRemoteRenderer.initialize();
-
-        // temp.onAddRemoteStream = ((stream) {
-        //   tempRemoteRenderer.srcObject = stream;
-        //   setState(() {});
-        // });
-        listenNewList.add([widget.roomId, widget.uid, doc.id, doc.data()]);
-        // await temp.addinRoom(
-        //     collectionName: widget.roomId,
-        //     docId: widget.uid,
-        //     refuid: doc.id,
-        //     uidData: doc.data());
-
-        list.add(temp);
-        setState(() {});
+        list.add([widget.roomId, widget.uid, doc.id, doc.data()]);
       }
+      setState(() {});
 
       // print("cities in CA: ${cities.join(", ")}");
     });
   }
 
   bool isLoading = true;
-  List<List<String>> listenOldlist = [];
-  List<List<dynamic>> listenNewList = [];
+  // List<List<String>> listenOldlist = [];
+  // List<List<dynamic>> listenNewList = [];
 
   Future<void> listenOld() async {
     stream = await navigator.mediaDevices
@@ -94,73 +90,24 @@ class _MeetingScreenState extends State<MeetingScreen> {
         .then((event) async {
       print("${event.docs.length} bta length");
       for (var doc in event.docs) {
-        // Map<String, dynamic> temp = doc.data();
         if (doc.id != widget.uid) {
-          PeerConnection temp = PeerConnection();
-          // RTCVideoRenderer tempRemoteRenderer = RTCVideoRenderer();
-          // temp.openUserMedia(_localRenderer, tempRemoteRenderer);
-          // tempRemoteRenderer.initialize();
-          // temp.onAddRemoteStream = ((stream) {
-          //   tempRemoteRenderer.srcObject = stream;
-          //   setState(() {});
-          // });
-          print("bta entered in listen o;f");
-          listenOldlist.add([doc.id, widget.roomId]);
-          //  await temp.joinRoom(docId: doc.id, collectionName: widget.roomId);
-
-          list.add(temp);
+          list.add([doc.id, widget.roomId]);
         }
       }
     });
-    print("bta listwnew");
     isLoading = false;
     setState(() {});
-    await listenNew();
+
+    FirebaseFirestore.instance
+        .collection(widget.roomId)
+        .doc(widget.uid)
+        .collection("rooms")
+        .snapshots()
+        .listen((event) async {
+      // await Future.delayed(Duration(seconds: 5));
+      listenNew();
+    });
   }
-
-  // RTCVideoRenderer _localRenderer = RTCVideoRenderer();
-  // RTCVideoRenderer _remoteRenderer = RTCVideoRenderer();
-  // MediaStream? _localStream;
-  // Future<RTCVideoRenderer> _getUserMedia(
-  //     RTCVideoRenderer _remoteRenderer, MediaStream yourRemoteStream) async {
-  //   final Map<String, dynamic> mediaConstraints = {
-  //     'audio': true,
-  //     'video': true,
-  //   };
-
-  //   try {
-  //     _localStream =
-  //         await navigator.mediaDevices.getUserMedia(mediaConstraints);
-  //     _localRenderer.srcObject = _localStream;
-
-  //     // Example of setting the remote stream, replace with your actual remote stream
-  //     _remoteRenderer.srcObject = yourRemoteStream;
-  //     return _remoteRenderer;
-  //   } catch (e) {
-  //     print('Error: $e');
-  //     throw e;
-  //   }
-  // }
-
-  // Future<void> _getUserMedialocal() async {
-  //   final Map<String, dynamic> mediaConstraints = {
-  //     'audio': true,
-  //     'video': true
-  //   };
-
-  //   try {
-  //     _localStream =
-  //         await navigator.mediaDevices.getUserMedia(mediaConstraints);
-  //     _localRenderer.srcObject = _localStream;
-
-  //     // Example of setting the remote stream, replace with your actual remote stream
-  //     // _remoteRenderer.srcObject = yourRemoteStream;
-  //     // return _remoteRenderer;
-  //   } catch (e) {
-  //     print('Error: $e');
-  //     throw e;
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -170,12 +117,12 @@ class _MeetingScreenState extends State<MeetingScreen> {
             child: CircularProgressIndicator(),
           )
         : Scaffold(
-            floatingActionButton: ElevatedButton(
-              child: Text("refresh"),
-              onPressed: () {
-                listenNew();
-              },
-            ),
+            // floatingActionButton: ElevatedButton(
+            //   child: Text("refresh"),
+            //   onPressed: () {
+            //     listenNew();
+            //   },
+            // ),
             appBar: AppBar(
               title: Text("Meeting Screen"),
             ),
@@ -187,10 +134,15 @@ class _MeetingScreenState extends State<MeetingScreen> {
                     // Builder(builder: (context) {
                     //   _localRenderer.initialize();
 
-                    SizedBox(
-                      height: 200,
-                      child: RTCVideoView(_localRenderer),
-                    ),
+                    // Align(
+                    //   alignment: Alignment.topLeft,
+                    //   child: SizedBox(
+                    //     height: 400,
+                    //     child: RTCVideoView(_localRenderer,
+                    //         objectFit: RTCVideoViewObjectFit
+                    //             .RTCVideoViewObjectFitCover),
+                    //   ),
+                    // ),
                     Text(
                       "${widget.roomId}",
                       style: TextStyle(color: Colors.black),
@@ -200,15 +152,42 @@ class _MeetingScreenState extends State<MeetingScreen> {
                     //   UserScreen(
                     //     peerConnection: list[i],
                     //   ),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height - 60,
+                      child: GridView.count(
+                        shrinkWrap: true,
+                        crossAxisCount: ((list.length + 1) / 3)
+                            .ceilToDouble()
+                            .toInt(), // Number of items in the cross axis
+                        crossAxisSpacing:
+                            8.0, // Space between items in the cross axis
+                        mainAxisSpacing:
+                            8.0, // Space between items in the main axis
+                        children: List.generate(list.length + 1, (index) {
+                          if (index == list.length) {
+                            return RTCVideoView(_localRenderer,
+                                mirror: true,
+                                objectFit: RTCVideoViewObjectFit
+                                    .RTCVideoViewObjectFitCover);
+                          }
+                          print("bta list lenght${list.length}");
+                          return Container(
+                              color: Colors.red,
+                              child: ListScreen(
+                                list: list[index],
+                              ));
+                        }),
+                      ),
+                    ),
 
-                    for (int i = 0; i < listenOldlist.length; i++)
-                      ListScreen(
-                        list: listenOldlist[i],
-                      ),
-                    for (int i = 0; i < listenNewList.length; i++)
-                      ListNewScreen(
-                        list: listenNewList[i],
-                      ),
+                    // for (int i = 0; i < list.length; i++)
+                    //   ListScreen(
+                    //     list: list[i],
+                    //   ),
+                    // for (int i = 0; i < listenNewList.length; i++)
+                    //   ListNewScreen(
+                    //     list: listenNewList[i],
+                    //   ),
                   ],
                 ),
               ),
@@ -297,7 +276,6 @@ class _ListScreenState extends State<ListScreen> {
   void initState() {
     // TODO: implement initState
 
-    _localRenderer.initialize();
     _remoteRenderer.initialize();
 
     setState(() {
@@ -312,44 +290,34 @@ class _ListScreenState extends State<ListScreen> {
 
   callFunction() async {
     // setState(()  {
+    print("bta call function");
+    print("bta list length l${widget.list.length}");
+
     peerConnection.localStream = stream;
 
     await peerConnection.openUserMedia(_localRenderer, _remoteRenderer);
-
-    await peerConnection.joinRoom(
-        docId: widget.list[0], collectionName: widget.list[1]);
-    // });
+    if (widget.list.length == 2) {
+      await peerConnection.joinRoom(
+          docId: widget.list[0], collectionName: widget.list[1]);
+      // });
+    } else {
+      await peerConnection.addinRoom(
+          collectionName: widget.list[0],
+          docId: widget.list[1],
+          refuid: widget.list[2],
+          uidData: widget.list[3]);
+    }
 
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // SizedBox(
-        //   height: 200,
-        //   width: 100,
-        //   child: RTCVideoView(_localRenderer),
-        //   // child: Container(
-        //   //   color: Colors.red,
-        //   // ),
-        // ),
-        SizedBox(
-          width: 10,
-        ),
-        SizedBox(
-          width: 100,
-          height: 200,
-          child: RTCVideoView(
-            _remoteRenderer,
-            mirror: true,
-          ),
-          // child: Container(
-          //   color: Colors.red,
-          // ),
-        ),
-      ],
+    print("render bta");
+    return RTCVideoView(
+      _remoteRenderer,
+      objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+      mirror: true,
     );
   }
 }
