@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:webrtcvideocall/services/peer_connection.dart';
 
+MediaStream? stream;
+
 class MeetingScreen extends StatefulWidget {
   const MeetingScreen({
     Key? key,
@@ -26,13 +28,15 @@ class _MeetingScreenState extends State<MeetingScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    // _localRenderer.initialize();
 
     // _getUserMedialocal();
 
     listenOld();
+    _localRenderer.initialize();
     // listenNew();
   }
+
+  RTCVideoRenderer _localRenderer = RTCVideoRenderer();
 
   List<PeerConnection> list = [];
   List<String> docId = [];
@@ -53,7 +57,6 @@ class _MeetingScreenState extends State<MeetingScreen> {
         }
         docId.add(doc.id);
         PeerConnection temp = PeerConnection();
-        RTCVideoRenderer tempRemoteRenderer = RTCVideoRenderer();
         // temp.openUserMedia(_localRenderer, tempRemoteRenderer);
 
         // tempRemoteRenderer.initialize();
@@ -82,6 +85,9 @@ class _MeetingScreenState extends State<MeetingScreen> {
   List<List<dynamic>> listenNewList = [];
 
   Future<void> listenOld() async {
+    stream = await navigator.mediaDevices
+        .getUserMedia({'video': true, 'audio': true});
+    _localRenderer.srcObject = stream;
     await FirebaseFirestore.instance
         .collection(widget.roomId)
         .get()
@@ -107,10 +113,9 @@ class _MeetingScreenState extends State<MeetingScreen> {
       }
     });
     print("bta listwnew");
-
-    await listenNew();
     isLoading = false;
     setState(() {});
+    await listenNew();
   }
 
   // RTCVideoRenderer _localRenderer = RTCVideoRenderer();
@@ -169,36 +174,44 @@ class _MeetingScreenState extends State<MeetingScreen> {
               child: Text("refresh"),
               onPressed: () {
                 listenNew();
-                setState(() {});
               },
             ),
             appBar: AppBar(
               title: Text("Meeting Screen"),
             ),
-            body: Column(
-              children: [
-                // Builder(builder: (context) {
-                //   _localRenderer.initialize();
+            body: SizedBox(
+              height: MediaQuery.of(context).size.height - 100,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    // Builder(builder: (context) {
+                    //   _localRenderer.initialize();
 
-                //   return SizedBox(
-                //     height: 200,
-                //     child: RTCVideoView(_localRenderer),
-                //   );
-                // }),
-                // for (int i = 0; i < list.length; i++)
-                //   UserScreen(
-                //     peerConnection: list[i],
-                //   ),
+                    SizedBox(
+                      height: 200,
+                      child: RTCVideoView(_localRenderer),
+                    ),
+                    Text(
+                      "${widget.roomId}",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                    // }),
+                    // for (int i = 0; i < list.length; i++)
+                    //   UserScreen(
+                    //     peerConnection: list[i],
+                    //   ),
 
-                for (int i = 0; i < listenOldlist.length; i++)
-                  ListScreen(
-                    list: listenOldlist[i],
-                  ),
-                for (int i = 0; i < listenNewList.length; i++)
-                  ListNewScreen(
-                    list: listenNewList[i],
-                  ),
-              ],
+                    for (int i = 0; i < listenOldlist.length; i++)
+                      ListScreen(
+                        list: listenOldlist[i],
+                      ),
+                    for (int i = 0; i < listenNewList.length; i++)
+                      ListNewScreen(
+                        list: listenNewList[i],
+                      ),
+                  ],
+                ),
+              ),
             ),
           );
   }
@@ -299,6 +312,8 @@ class _ListScreenState extends State<ListScreen> {
 
   callFunction() async {
     // setState(()  {
+    peerConnection.localStream = stream;
+
     await peerConnection.openUserMedia(_localRenderer, _remoteRenderer);
 
     await peerConnection.joinRoom(
@@ -312,14 +327,14 @@ class _ListScreenState extends State<ListScreen> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SizedBox(
-          height: 200,
-          width: 100,
-          child: RTCVideoView(_localRenderer),
-          // child: Container(
-          //   color: Colors.red,
-          // ),
-        ),
+        // SizedBox(
+        //   height: 200,
+        //   width: 100,
+        //   child: RTCVideoView(_localRenderer),
+        //   // child: Container(
+        //   //   color: Colors.red,
+        //   // ),
+        // ),
         SizedBox(
           width: 10,
         ),
@@ -334,11 +349,6 @@ class _ListScreenState extends State<ListScreen> {
           //   color: Colors.red,
           // ),
         ),
-        ElevatedButton(
-            onPressed: () {
-              setState(() {});
-            },
-            child: Text("lol")),
       ],
     );
   }
@@ -380,6 +390,7 @@ class _ListNewScreenState extends State<ListNewScreen> {
   callFunction() async {
     // setState(() {});
     // setState(() {
+    peerConnection.localStream = stream;
     await peerConnection.openUserMedia(_localRenderer, _remoteRenderer);
 
     await peerConnection.addinRoom(
@@ -396,14 +407,14 @@ class _ListNewScreenState extends State<ListNewScreen> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SizedBox(
-          height: 200,
-          width: 100,
-          child: RTCVideoView(_localRenderer),
-          // child: Container(
-          //   color: Colors.red,
-          // ),
-        ),
+        // SizedBox(
+        //   height: 200,
+        //   width: 100,
+        //   child: RTCVideoView(_localRenderer),
+        //   // child: Container(
+        //   //   color: Colors.red,
+        //   // ),
+        // ),
         SizedBox(
           width: 10,
         ),
@@ -418,11 +429,6 @@ class _ListNewScreenState extends State<ListNewScreen> {
           //   color: Colors.red,
           // ),
         ),
-        ElevatedButton(
-            onPressed: () {
-              setState(() {});
-            },
-            child: Text("lol1"))
       ],
     );
   }

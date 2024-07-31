@@ -156,7 +156,7 @@ class PeerConnection {
       print("Error creating PeerConnection: $e");
       throw e;
     }
-    localStream = stream;
+    // localStream = stream;
     print("bta local stream sendingjoin1 ${localStream?.getTracks()}");
     localStream?.getTracks().forEach((track) {
       print("bta local stream sendingjoin");
@@ -307,15 +307,17 @@ class PeerConnection {
     RTCVideoRenderer localVideo,
     RTCVideoRenderer remoteVideo,
   ) async {
-    stream = await navigator.mediaDevices
-        .getUserMedia({'video': true, 'audio': true});
+    //working
 
-    localVideo.srcObject = stream;
-    localStream = stream;
-    print(" ${localStream!.getTracks().length} bta length of local stream");
-    localStream!.getTracks().forEach((track) {
-      print("Track: ${track.kind}");
-    });
+    // stream = await navigator.mediaDevices
+    //     .getUserMedia({'video': true, 'audio': true});
+
+    // localVideo.srcObject = stream;
+    // // localStream = stream;
+    // print(" ${localStream!.getTracks().length} bta length of local stream");
+    // localStream!.getTracks().forEach((track) {
+    //   print("Track: ${track.kind}");
+    // });
     remoteVideo.srcObject = await createLocalMediaStream('key');
   }
 
