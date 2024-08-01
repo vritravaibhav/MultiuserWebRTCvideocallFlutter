@@ -25,61 +25,60 @@ class _HomeScreenV1State extends State<HomeScreenV1> {
         title: Text("Multi user video call"),
       ),
       body: Padding(
-        padding: EdgeInsets.all(0),
+        padding: EdgeInsets.all(30),
         child: Column(
           children: [
             TextField(
               controller: x,
+              decoration: InputDecoration(
+                labelText: 'Enter text',
+                hintText: 'Type something here...',
+                prefixIcon: Icon(Icons.video_call),
+                border: OutlineInputBorder(),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(color: Colors.green, width: 2.0),
+                ),
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.clear),
+                  onPressed: () {
+                    x.clear();
+                  },
+                ),
+                filled: true,
+                fillColor: Colors.grey[200],
+              ),
             ),
-            Row(
-              children: [
-                ElevatedButton(
-                    onPressed: () async{
-                      if (x.text.isEmpty) {
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(SnackBar(content: Text("hehe")));
-                        return;
-                      } else {
-                        // FirebaseFirestore.instance
-                        //     .collection(x.text)
-                        //     .snapshots()
-                        //     .listen((event) {
-                        //   for (var doc in event.docs) {
-                        //     // Map<String, dynamic> temp = doc.data();
-                        //     PeerConnection().joinRoom(
-                        //         docId: doc.id, collectionName: x.text);
-                        //   }
-                        // });
-                      String uid = await loadUserId();
-                         FirebaseFirestore.instance
-                            .collection(x.text)
-                            .doc(uid)
-                            .set({"uid": uid});
-
-                        Navigator.push(context, MaterialPageRoute(builder: (context){
-                          return MeetingScreen(roomId: x.text, uid: uid);
-                        }));
-                      }
-                    },
-                    child: Text("Create room")),
-                ElevatedButton(
-                    onPressed: () async {
-                      if (x.text.isEmpty) {
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(SnackBar(content: Text("hehe")));
-                        return;
-                      } else {
-                        String uid = await loadUserId();
-                        FirebaseFirestore.instance
-                            .collection(x.text)
-                            .doc(uid)
-                            .set({"uid": uid});
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => MeetingScreen(roomId: x.text, uid: uid,),));
-                      }
-                    },
-                    child: Text("Join room")),
-              ],
-            )
+            SizedBox(
+              height: 10,
+            ),
+            ElevatedButton(
+                onPressed: () async {
+                  if (x.text.isEmpty) {
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text("hehe")));
+                    return;
+                  } else {
+                    String uid = await loadUserId();
+                    FirebaseFirestore.instance
+                        .collection(x.text)
+                        .doc(uid)
+                        .set({"uid": uid});
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MeetingScreen(
+                            roomId: x.text,
+                            uid: uid,
+                          ),
+                        ));
+                  }
+                },
+                child: Text("Join room"))
           ],
         ),
       ),
