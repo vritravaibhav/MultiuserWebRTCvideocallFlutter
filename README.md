@@ -5,7 +5,7 @@ This is Multiuser video call project using WEBRTC and firebase.
 
 Steps to run this project:
 
- STEP 1: clone this project( main branch will also work but optimizing branch code has better ui and Functionable)
+ STEP 1: clone this project( main branch will also work but optimizing branch code has better ui and Functional)
  
  STEP 2: Open teminal then run this command "Flutter pub get"/n
  
