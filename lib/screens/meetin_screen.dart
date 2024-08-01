@@ -98,15 +98,15 @@ class _MeetingScreenState extends State<MeetingScreen> {
     isLoading = false;
     setState(() {});
 
-    FirebaseFirestore.instance
-        .collection(widget.roomId)
-        .doc(widget.uid)
-        .collection("rooms")
-        .snapshots()
-        .listen((event) async {
-      // await Future.delayed(Duration(seconds: 5));
-      listenNew();
-    });
+    // FirebaseFirestore.instance
+    //     .collection(widget.roomId)
+    //     .doc(widget.uid)
+    //     .collection("rooms")
+    //     .snapshots()
+    //     .listen((event) async {
+    //   // await Future.delayed(Duration(seconds: 5));
+    //   listenNew();
+    // });
   }
 
   @override
@@ -117,12 +117,12 @@ class _MeetingScreenState extends State<MeetingScreen> {
             child: CircularProgressIndicator(),
           )
         : Scaffold(
-            // floatingActionButton: ElevatedButton(
-            //   child: Text("refresh"),
-            //   onPressed: () {
-            //     listenNew();
-            //   },
-            // ),
+            floatingActionButton: ElevatedButton(
+              child: Text("refresh"),
+              onPressed: () {
+                listenNew();
+              },
+            ),
             appBar: AppBar(
               title: Text("Meeting Screen"),
             ),
