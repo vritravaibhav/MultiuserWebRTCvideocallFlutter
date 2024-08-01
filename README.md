@@ -1,7 +1,7 @@
 # webrtcvideocall
 
 A new Flutter project.
-This is Multiuser video call project using WEBRTC and firebase.
+# This is Multiuser video call project using WEBRTC, firebase and flutter.
 
 Steps to run this project:
 
