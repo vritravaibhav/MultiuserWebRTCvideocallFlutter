@@ -17,6 +17,7 @@ Steps to run this project:
 and Enter same unique value in other smartphones to enter in same room.
 
 Why unique value??
+
   when u enter unique value in texfield and join room. I create a collection named unique value in firebase so when u entered that value again it will still work but some black screen will also come of old user who entered in this room previously or add your own databse or add some unique value.
 
  if still something coming feel free to message me on instagram @vritravaibhav. 
