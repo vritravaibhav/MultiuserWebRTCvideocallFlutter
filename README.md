@@ -9,7 +9,7 @@ Steps to run this project:
  
  STEP 2: Open teminal then run this command "Flutter pub get"/n
  
- STEP 3: Add your own firebase database be
+ STEP 3: Add your own firebase database because (reason explained below). Change database firebase rule bcause there's no authentication.
 
  STEP 4: Run the project (if error comes fix using stackoverflow or any other way)
  
